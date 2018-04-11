@@ -9,6 +9,8 @@ class RBM:
 
         np_rng = np.random.RandomState(1234)
 
+
+
         self.weights = np.asarray(np_rng.uniform(
             low=-0.1 * np.sqrt(6.0 / (num_hidden + num_visible)),
             high=0.1 * np.sqrt(6.0 / (num_hidden + num_visible)),
@@ -17,8 +19,10 @@ class RBM:
         self.weights = np.insert(self.weights, 0, 0, axis=0)
         self.weights = np.insert(self.weights, 0, 0, axis=1)
 
-    def train(self, data, max_epochs=1000, learning_rate=0.3):
+    def train(self, data, transform, max_epochs=1000, learning_rate=0.3):
 
+        if transform:
+            self.weights = self.weights.T
 
         num_examples = data.shape[0]
 
@@ -34,17 +38,22 @@ class RBM:
             pos_associations = np.dot(data.T, pos_hidden_probs)
 
             neg_visible_activations = np.dot(pos_hidden_states, self.weights.T)
+            print(neg_visible_activations.shape)
             neg_visible_probs = self._logistic(neg_visible_activations)
             neg_visible_probs[:, 0] = 1
+            print(neg_visible_probs.shape)
             neg_hidden_activations = np.dot(neg_visible_probs, self.weights)
+            print(neg_hidden_activations.shape)
             neg_hidden_probs = self._logistic(neg_hidden_activations)
+            print(neg_hidden_probs.shape)
 
             neg_associations = np.dot(neg_visible_probs.T, neg_hidden_probs)
+            print(neg_associations.shape)
 
             self.weights += learning_rate * ((pos_associations - neg_associations) / num_examples)
 
             error = np.sum((data - neg_visible_probs) ** 2)
-            # print("Epoch %s: error is %s" % (epoch, error))
+            print("Epoch %s: error is %s" % (epoch, error))
         print("Error for layer 1 is:", error)
 
     def run_visible(self, data):
@@ -54,7 +63,7 @@ class RBM:
 
         hidden_states = np.ones((num_examples, self.num_hidden + 1))
 
-        data = np.insert(data, 0, 1, axis=0)
+        data = np.insert(data, 0, 1, axis=1)
 
         hidden_activations = np.dot(data, self.weights)
         hidden_probs = self._logistic(hidden_activations)
@@ -87,10 +96,9 @@ class RBM:
 
 
 if __name__ == '__main__':
-    r = RBM(num_visible=7, num_hidden=7)
+    r = RBM(num_visible=7, num_hidden=2)
     training_data = PreProcess.parse()
-    print(training_data[1])
-    r.train(training_data, max_epochs=10000)
-    print(r.weights)
-    user = np.array([training_data[1]])
+    r.train(training_data, transform=False, max_epochs=10000)
+    user = np.array([training_data[0]])
+    print(user)
     print(r.run_visible(user))
