@@ -17,13 +17,13 @@ class DBN(object):
         self.weights = np.insert(self.weights, 0, 0, axis=0)
         self.weights = np.insert(self.weights, 0, 0, axis=1)
 
-        #self.weights = self.weights.T
 
     def train(self, data, max_epochs=1000, learning_rate=0.5):
         num_examples = data.shape[0]
 
         data = np.insert(data, 0, 1, axis=2)
         data = np.reshape(data,(data.shape[0],data.shape[2]))
+
         for epoch in range(max_epochs):
             pos_hidden_activations = np.dot(data, self.weights)
             pos_hidden_probs = self._logistic(pos_hidden_activations)
@@ -50,9 +50,9 @@ class DBN(object):
 
         hidden_states = np.ones((num_examples, self.num_hidden + 1))
 
-        data = np.insert(data, 0, 1, axis=0)
+        data = np.insert(data, 0, 1, axis=1)
 
-        hidden_activations = np.dot(data, self.weights)
+        hidden_activations = np.dot(np.squeeze(data,axis=0), self.weights)
         hidden_probs = self._logistic(hidden_activations)
 
         hidden_states[:, :] = hidden_probs > np.random.rand(num_examples, self.num_hidden + 1)
@@ -65,7 +65,7 @@ class DBN(object):
 
         visible_states = np.ones((num_examples, self.num_visible + 1))
 
-        data = np.insert(data, 0, 0, axis=1)
+        data = np.insert(data, 0, 1, axis=1)
 
         visible_activations = np.dot(data, self.weights.T)
         visible_probs = self._logistic(visible_activations)
@@ -89,13 +89,19 @@ if __name__ == '__main__':
         new_example = np.asarray(r.run_visible(example))
         new_training.append(new_example)
     new_training = np.asarray(new_training)
-    d = DBN(num_visible=100, num_hidden=100)
-    d.train(new_training, max_epochs=10000)
-    #layer_three = np.asarray(d.run_visible(new_training[-1]))
-    #print(d.weights)
-    #print(layer_three)
-    #three = RBM(num_hidden=7, num_visible=2)
-    #three.train(layer_three, transform=True, max_epochs=100)
+    d = DBN(num_visible=100, num_hidden=7)
+    d.train(new_training, max_epochs=100)
+    layer_three = []
+    print(new_training.shape)
+    for ex in new_training:
+        ex = np.array(ex)
+        new_ex = np.asarray(d.run_visible(ex))
+        layer_three.append(new_ex)
+    layer_three = np.asarray(layer_three)
+    print(layer_three.shape)
+    print(d.weights)
+    three = DBN(num_visible=7, num_hidden=2)
+    three.train(layer_three, max_epochs=100)
 
-    #user = np.array([training_data[1]])
-    #print(r.run_visible(user))
+    #user = np.array([layer_three[1]])
+    #print(three.run_visible(user))

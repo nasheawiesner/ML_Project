@@ -38,17 +38,12 @@ class RBM:
             pos_associations = np.dot(data.T, pos_hidden_probs)
 
             neg_visible_activations = np.dot(pos_hidden_states, self.weights.T)
-            print(neg_visible_activations.shape)
             neg_visible_probs = self._logistic(neg_visible_activations)
             neg_visible_probs[:, 0] = 1
-            print(neg_visible_probs.shape)
             neg_hidden_activations = np.dot(neg_visible_probs, self.weights)
-            print(neg_hidden_activations.shape)
             neg_hidden_probs = self._logistic(neg_hidden_activations)
-            print(neg_hidden_probs.shape)
 
             neg_associations = np.dot(neg_visible_probs.T, neg_hidden_probs)
-            print(neg_associations.shape)
 
             self.weights += learning_rate * ((pos_associations - neg_associations) / num_examples)
 
