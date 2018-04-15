@@ -26,6 +26,7 @@ def vectorize_day(day):
 def parse():
     #path = "./formatted_data/"
     possessions = []
+    labels = []
     #for file in glob.glob(os.path.join(path, '*.json')):
     with open("test.json", encoding='utf-8') as input_file:
         data = json.loads(input_file.read())
@@ -57,13 +58,13 @@ def parse():
                         day = ""
                         lineType = 0
                         pull_start = 0
-                        scored = 0
+                        scored = 0.0
                         for k in j['events']:  #iterate through actions
                             index = j['events'].index(k)
                             if k['type'] == "Offense":
                                 numPasses += 1
                                 if k["action"] == "Goal":
-                                    scored = 1
+                                    scored = 1.0
                                 if k['passer'] not in distinctPlayers and k['passer'] != "Anonymous":
                                     distinctPlayers.append(k['passer'])
                                     numTouches += 1
@@ -94,7 +95,7 @@ def parse():
                                     #day = vectorize_day(day[0])
                                     #date = re.findall('\d+', date)
                                     #date = int(date[0] + date[1])
-                                    possession.extend([numPasses,numTouches,totalPointsPlayed, lineType, pull_start, poss_count, scored])
+                                    possession.extend([numPasses,numTouches,totalPointsPlayed, lineType, pull_start, poss_count,scored])
                                     #print(possession)
                                     possessions.append(possession)
                             elif k['type'] == "Defense":
@@ -113,8 +114,12 @@ def parse():
                                 lineType = 0
                                 pull_start = 0
                             first = False
+        for p in possessions:  #separate labels from training examples
+            labels.append(p[-1])
+            del p[-1]
         possessions = possessions / np.linalg.norm(possessions)
-    return possessions
+        labels = np.asarray(labels)
+    return possessions,labels
 
 
 

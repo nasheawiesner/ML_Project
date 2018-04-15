@@ -80,28 +80,43 @@ class DBN(object):
 
 
 if __name__ == '__main__':
-    r = RBM(num_visible=7, num_hidden=100)
-    training_data = PreProcess.parse()
+    layers = 2
+    r = RBM(num_visible=6, num_hidden=100)
+    training_data, labels = PreProcess.parse()
     new_training = []
-    r.train(training_data, transform=False, max_epochs=100)
+    r.train(training_data, max_epochs=100)
     for example in training_data:
         example = np.array([example])
         new_example = np.asarray(r.run_visible(example))
         new_training.append(new_example)
     new_training = np.asarray(new_training)
-    d = DBN(num_visible=100, num_hidden=7)
+    d = DBN(num_visible=100, num_hidden=1)
     d.train(new_training, max_epochs=100)
-    layer_three = []
-    print(new_training.shape)
-    for ex in new_training:
-        ex = np.array(ex)
-        new_ex = np.asarray(d.run_visible(ex))
-        layer_three.append(new_ex)
-    layer_three = np.asarray(layer_three)
-    print(layer_three.shape)
-    print(d.weights)
-    three = DBN(num_visible=7, num_hidden=2)
-    three.train(layer_three, max_epochs=100)
-
-    #user = np.array([layer_three[1]])
-    #print(three.run_visible(user))
+    if layers == 2:
+        total = training_data.shape[0]
+        correct = 0
+        iter = 0
+        for i in new_training:
+            i = np.array(i)
+            if labels[iter] == d.run_visible(i):
+                correct += 1
+            iter += 1
+        print("The 2-layer DBN has ", correct, "correct classifications out of", total, " examples")
+    if layers == 3:
+        layer_three = []
+        for ex in new_training:
+            ex = np.array(ex)
+            new_ex = np.asarray(d.run_visible(ex))
+            layer_three.append(new_ex)
+        layer_three = np.asarray(layer_three)
+        three = DBN(num_visible=7, num_hidden=1)
+        three.train(layer_three, max_epochs=100)
+        total = training_data.shape[0]
+        correct = 0
+        iter = 0
+        for i in layer_three:
+            i = np.array(i)
+            if labels[iter] == three.run_visible(i):
+                correct += 1
+            iter += 1
+        print("The 3-layer DBN has ", correct, "correct classifications out of", total, " examples")

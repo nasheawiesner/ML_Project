@@ -19,10 +19,7 @@ class RBM:
         self.weights = np.insert(self.weights, 0, 0, axis=0)
         self.weights = np.insert(self.weights, 0, 0, axis=1)
 
-    def train(self, data, transform, max_epochs=1000, learning_rate=0.3):
-
-        if transform:
-            self.weights = self.weights.T
+    def train(self, data, max_epochs=1000, learning_rate=0.3):
 
         num_examples = data.shape[0]
 
@@ -91,9 +88,20 @@ class RBM:
 
 
 if __name__ == '__main__':
-    r = RBM(num_visible=7, num_hidden=2)
-    training_data = PreProcess.parse()
-    r.train(training_data, transform=False, max_epochs=10000)
-    user = np.array([training_data[0]])
-    print(user)
-    print(r.run_visible(user))
+    r = RBM(num_visible=6, num_hidden=1)
+    training_data, labels = PreProcess.parse()
+    print(training_data.shape)
+    r.train(training_data, max_epochs=10000)
+    #user = np.array([training_data[1]])
+    #print(user)
+    #print(labels[1])
+    total = training_data.shape[0]
+    correct = 0
+    iter = 0
+    for example in training_data:
+        example = np.array([example])
+        r.run_visible(example)
+        if labels[iter] == r.run_visible(example):
+            correct += 1
+        iter += 1
+    print("The RBM has ", correct, "correct classifications out of", total, " examples")
