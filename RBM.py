@@ -48,7 +48,7 @@ class RBM:
             self.weights += learning_rate * ((pos_associations - neg_associations) / num_examples)
 
             error = np.sum((data - neg_visible_probs) ** 2)
-            print("Epoch %s: error is %s" % (epoch, error))
+            #print("Epoch %s: error is %s" % (epoch, error))
         print("Error for layer 1 is:", error)
 
     def run_visible(self, data):
@@ -91,16 +91,11 @@ class RBM:
 
 
 if __name__ == '__main__':
-    r = RBM(num_visible=6, num_hidden=1)
-    training_data, labels = PreProcess.parse()
-   # print(training_data.shape)
-    training_data, labels = process_movement.parse()
-    print(training_data.shape)
 
-    r.train(training_data, max_epochs=100)
-
+    training_data, labels = PreProcess_sequential.parse()
     n = training_data.shape[1]
     print(n)
+
     r = RBM(num_visible=n, num_hidden=1)
 
     r.train(training_data, max_epochs=10000)

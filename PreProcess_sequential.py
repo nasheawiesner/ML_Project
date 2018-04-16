@@ -1,4 +1,3 @@
-
 import json
 import re
 import os
@@ -104,11 +103,7 @@ def parse():
                                     #date = re.findall('\d+', date)
                                     #date = int(date[0] + date[1])
 
-                                    #change event_list to numeric
-                                    le = LabelEncoder()
-                                    le.fit(event_list)
-                                    event_list = le.transform(event_list)
-                                    event_list = [event+1 for event in event_list]
+
                                     possession.extend(event_list)
                                     possession.extend([numPasses,numTouches,totalPointsPlayed, lineType, pull_start, poss_count, scored])
                                     event_list = []
@@ -143,8 +138,46 @@ def parse():
             with_padding.append(new_p)
         possessions = with_padding
 
-        # normalize
-        possessions = possessions / np.linalg.norm(possessions)
+        # detect names and change to numeric values
+        flat_list = [item for sublist in possessions for item in sublist]
+        unique_items = set(flat_list)
+        unique_strings = [x for x in unique_items if x.__class__ == 'a'.__class__]
+        name_map = dict()
+        counter = 1
+        for s in unique_strings:
+            name_map[s] = counter
+            counter = counter + 1
+        
+        new_possessions = []
+        for p in possessions:
+            new_possession = []
+            for i in p:
+                if i in name_map:
+                    new_possession.append(name_map[i])
+                else:
+                    new_possession.append(i)
+            new_possessions.append(new_possession)
+        possessions = new_possessions
+                
 
-        print(possessions)
+        # normalize
+        #possessions = possessions / np.linalg.norm(possessions)
+
+        # change to binary representation, with 9 bits
+        new_possessions = []
+        for p in possessions:
+            new_possession = []
+            for i in p:
+                binary_string = str("{0:b}".format(i).zfill(9))
+                for x in binary_string:
+                    new_possession.append(int(x))
+            new_possessions.append(new_possession)
+        possessions = new_possessions
+
+        possessions = np.array(possessions)
+
     return possessions, labels
+
+
+
+
