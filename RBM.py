@@ -1,6 +1,8 @@
 import numpy as np
 import PreProcess
 import process_movement
+import PreProcess_sequential
+
 
 
 class RBM:
@@ -89,12 +91,19 @@ class RBM:
 
 
 if __name__ == '__main__':
-    r = RBM(num_visible=23, num_hidden=13)
+    r = RBM(num_visible=6, num_hidden=1)
     training_data, labels = PreProcess.parse()
    # print(training_data.shape)
     training_data, labels = process_movement.parse()
     print(training_data.shape)
+
     r.train(training_data, max_epochs=100)
+
+    n = training_data.shape[1]
+    print(n)
+    r = RBM(num_visible=n, num_hidden=1)
+
+    r.train(training_data, max_epochs=10000)
     #user = np.array([training_data[1]])
     #print(user)
     #print(labels[1])

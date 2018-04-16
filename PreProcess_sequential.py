@@ -1,9 +1,11 @@
+
 import json
 import re
 import os
 import glob
 import scipy
 from sklearn.preprocessing import normalize
+from sklearn.preprocessing import LabelEncoder
 import numpy as np
 
 def vectorize_day(day):
@@ -26,6 +28,7 @@ def vectorize_day(day):
 def parse():
     #path = "./formatted_data/"
     possessions = []
+    labels = []
     #for file in glob.glob(os.path.join(path, '*.json')):
     with open("test.json", encoding='utf-8') as input_file:
         data = json.loads(input_file.read())
@@ -100,10 +103,15 @@ def parse():
                                     #day = vectorize_day(day[0])
                                     #date = re.findall('\d+', date)
                                     #date = int(date[0] + date[1])
-                                    possession.extend([numPasses,numTouches,totalPointsPlayed, lineType, pull_start, poss_count, scored])
+
+                                    #change event_list to numeric
+                                    le = LabelEncoder()
+                                    le.fit(event_list)
+                                    event_list = le.transform(event_list)
+                                    event_list = [event+1 for event in event_list]
                                     possession.extend(event_list)
+                                    possession.extend([numPasses,numTouches,totalPointsPlayed, lineType, pull_start, poss_count, scored])
                                     event_list = []
-                                    #print(possession)
                                     possessions.append(possession)
 
                             elif k['type'] == "Defense":
@@ -122,9 +130,21 @@ def parse():
                                 lineType = 0
                                 pull_start = 0
                             first = False
-        #possessions = possessions / np.linalg.norm(possessions)
-    return possessions
+        for p in possessions:  #separate labels from training examples
+            labels.append(p[-1])
+            del p[-1]
 
+        # add 0s to end of each possession so same length
+        max_length = max([len(x) for x in possessions])
+        with_padding = []
+        for p in possessions:
+            to_add = max_length - len(p)
+            new_p = p + to_add*[0]
+            with_padding.append(new_p)
+        possessions = with_padding
 
+        # normalize
+        possessions = possessions / np.linalg.norm(possessions)
 
-
+        print(possessions)
+    return possessions, labels
