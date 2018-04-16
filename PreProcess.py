@@ -2,8 +2,6 @@ import json
 import re
 import os
 import glob
-import scipy
-from sklearn.preprocessing import normalize
 import numpy as np
 
 def vectorize_day(day):
@@ -114,9 +112,16 @@ def parse():
                                 lineType = 0
                                 pull_start = 0
                             first = False
+        goal = 0
+        miss = 0
         for p in possessions:  #separate labels from training examples
+            if p[-1] == 1.0:
+                goal += 1
+            else:
+                miss += 1
             labels.append(p[-1])
             del p[-1]
+        #print("goals: ",goal, "\nmisses: ",miss)
         possessions = possessions / np.linalg.norm(possessions)
         labels = np.asarray(labels)
     return possessions,labels

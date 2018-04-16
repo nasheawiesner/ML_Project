@@ -80,18 +80,18 @@ class DBN(object):
 
 
 if __name__ == '__main__':
-    layers = 2
-    r = RBM(num_visible=6, num_hidden=100)
+    layers = 3
+    r = RBM(num_visible=6, num_hidden=1000)
     training_data, labels = PreProcess.parse()
     new_training = []
-    r.train(training_data, max_epochs=100)
+    r.train(training_data, max_epochs=1000)
     for example in training_data:
         example = np.array([example])
         new_example = np.asarray(r.run_visible(example))
         new_training.append(new_example)
     new_training = np.asarray(new_training)
-    d = DBN(num_visible=100, num_hidden=1)
-    d.train(new_training, max_epochs=100)
+    d = DBN(num_visible=1000, num_hidden=50)
+    d.train(new_training, max_epochs=1000)
     if layers == 2:
         total = training_data.shape[0]
         correct = 0
@@ -109,8 +109,8 @@ if __name__ == '__main__':
             new_ex = np.asarray(d.run_visible(ex))
             layer_three.append(new_ex)
         layer_three = np.asarray(layer_three)
-        three = DBN(num_visible=7, num_hidden=1)
-        three.train(layer_three, max_epochs=100)
+        three = DBN(num_visible=50, num_hidden=1)
+        three.train(layer_three, max_epochs=1000)
         total = training_data.shape[0]
         correct = 0
         iter = 0

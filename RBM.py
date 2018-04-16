@@ -1,5 +1,6 @@
 import numpy as np
 import PreProcess
+import process_movement
 
 
 class RBM:
@@ -88,10 +89,12 @@ class RBM:
 
 
 if __name__ == '__main__':
-    r = RBM(num_visible=6, num_hidden=1)
+    r = RBM(num_visible=23, num_hidden=13)
     training_data, labels = PreProcess.parse()
+   # print(training_data.shape)
+    training_data, labels = process_movement.parse()
     print(training_data.shape)
-    r.train(training_data, max_epochs=10000)
+    r.train(training_data, max_epochs=100)
     #user = np.array([training_data[1]])
     #print(user)
     #print(labels[1])
@@ -100,8 +103,8 @@ if __name__ == '__main__':
     iter = 0
     for example in training_data:
         example = np.array([example])
-        r.run_visible(example)
-        if labels[iter] == r.run_visible(example):
+        print(r.run_visible(example))
+        if labels[iter] == r.run_visible(example).all():
             correct += 1
         iter += 1
     print("The RBM has ", correct, "correct classifications out of", total, " examples")
