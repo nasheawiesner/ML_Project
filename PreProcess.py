@@ -31,11 +31,11 @@ def parse():
     with open("test.json", encoding='utf-8') as input_file:
         data = json.loads(input_file.read())
 
-        for i in data[0:2]:  #iterate through games
+        for i in data:  #iterate through games
             player_point_count = []
             totalPointsPlayed = 0
             if 'pointsJson' in i:
-                for j in i['pointsJson'][0:2]: #iterate through events
+                for j in i['pointsJson']: #iterate through events
                     if j["events"][0]["type"] != "Cessation" and 'line' in j:
                         for player in j['line']:
                             if player not in player_point_count:
